@@ -1,6 +1,7 @@
 use crate::{
     AsyncFile, DirectoryEntryKind, DirectoryReader, FsError, TempDir, atomic_write_string,
-    read_bounded, read_string_bounded, read_string_bounded_if_exists, symlink_metadata, try_exists,
+    read_bounded, read_string_bounded, read_string_bounded_if_exists, remove_file,
+    symlink_metadata, try_exists,
 };
 
 async fn test_root() -> TempDir {
@@ -94,6 +95,14 @@ async fn symlink_metadata_is_available_through_the_async_boundary() {
             .expect("read metadata")
             .is_file()
     );
+    root.remove().await.expect("remove test root");
+}
+
+#[tokio::test]
+async fn removing_a_missing_file_is_an_error() {
+    let root = test_root().await;
+    let result = remove_file(root.path().join("missing.txt")).await;
+    assert!(matches!(result, Err(FsError::Write { .. })));
     root.remove().await.expect("remove test root");
 }
 

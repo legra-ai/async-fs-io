@@ -137,6 +137,14 @@ pub async fn remove_if_exists(path: impl AsRef<Path>) -> Result<(), FsError> {
     }
 }
 
+/// Remove a file, reporting a missing file as an error.
+pub async fn remove_file(path: impl AsRef<Path>) -> Result<(), FsError> {
+    let path = path.as_ref();
+    tokio::fs::remove_file(path)
+        .await
+        .map_err(|error| FsError::io(Operation::Write, path, error))
+}
+
 /// Rename a file or directory.
 pub async fn rename(from: impl AsRef<Path>, to: impl AsRef<Path>) -> Result<(), FsError> {
     let from = from.as_ref();

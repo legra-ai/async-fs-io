@@ -1,0 +1,77 @@
+use crate::{
+    AsyncFile, DirectoryEntryKind, DirectoryReader, FsError, TempDir, atomic_write_string,
+    read_bounded, read_string_bounded,
+};
+
+async fn test_root() -> TempDir {
+    TempDir::create(std::env::temp_dir())
+        .await
+        .expect("create async test root")
+}
+
+#[tokio::test]
+async fn bounded_read_rejects_a_file_larger_than_the_declared_limit() {
+    let root = test_root().await;
+    let path = root.path().join("large.txt");
+    let mut file = AsyncFile::create(&path).await.expect("create file");
+    file.write_all(b"0123456789").await.expect("write file");
+    file.flush().await.expect("flush file");
+
+    let result = read_bounded(&path, 9).await;
+
+    assert!(matches!(result, Err(FsError::InvalidRequest(_))));
+    root.remove().await.expect("remove test root");
+}
+
+#[tokio::test]
+async fn bounded_text_read_accepts_content_within_the_limit() {
+    let root = test_root().await;
+    let path = root.path().join("text.txt");
+    atomic_write_string(&path, "hello")
+        .await
+        .expect("write text");
+
+    assert_eq!(
+        read_string_bounded(&path, 5).await.expect("read text"),
+        "hello"
+    );
+    root.remove().await.expect("remove test root");
+}
+
+#[tokio::test]
+async fn directory_reader_keeps_one_entry_at_a_time() {
+    let root = test_root().await;
+    let first = root.path().join("first");
+    let second = root.path().join("second");
+    AsyncFile::create(&first).await.expect("create first");
+    AsyncFile::create(&second).await.expect("create second");
+
+    let mut reader = DirectoryReader::open(root.path())
+        .await
+        .expect("open directory");
+    let mut seen = 0usize;
+    while let Some(entry) = reader.next().await.expect("read directory entry") {
+        assert_eq!(entry.kind(), DirectoryEntryKind::File);
+        seen += 1;
+    }
+
+    assert_eq!(seen, 2);
+    root.remove().await.expect("remove test root");
+}
+
+#[tokio::test]
+async fn temporary_directory_cleanup_is_explicitly_async() {
+    let root = test_root().await;
+    let nested = TempDir::create(root.path())
+        .await
+        .expect("create nested root");
+    let nested_path = nested.path().to_owned();
+    nested.remove().await.expect("remove nested root");
+    assert!(
+        AsyncFile::open_if_exists(nested_path)
+            .await
+            .expect("inspect nested root")
+            .is_none()
+    );
+    root.remove().await.expect("remove test root");
+}

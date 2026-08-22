@@ -16,17 +16,11 @@ impl TempDir {
         tokio::fs::create_dir_all(&root)
             .await
             .map_err(|error| FsError::io(Operation::Directory, &root, error))?;
-        for _attempt in 0..16 {
-            let path = root.join(format!("tmp-{}", uuid::Uuid::new_v4()));
-            match tokio::fs::create_dir(&path).await {
-                Ok(()) => return Ok(Self { path }),
-                Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
-                Err(error) => return Err(FsError::io(Operation::Directory, &path, error)),
-            }
-        }
-        Err(FsError::InvalidRequest(
-            "could not allocate a unique temporary directory after 16 attempts".to_owned(),
-        ))
+        let path = root.join(format!("tmp-{}", uuid::Uuid::new_v4()));
+        tokio::fs::create_dir(&path)
+            .await
+            .map_err(|error| FsError::io(Operation::Directory, &path, error))?;
+        Ok(Self { path })
     }
 
     /// Return the directory path.
@@ -54,26 +48,12 @@ impl TempFile {
         tokio::fs::create_dir_all(&root)
             .await
             .map_err(|error| FsError::io(Operation::Directory, &root, error))?;
-        for _attempt in 0..16 {
-            let path = root.join(format!("tmp-file-{}", uuid::Uuid::new_v4()));
-            match AsyncFile::create_new(&path).await {
-                Ok(file) => {
-                    return Ok(Self {
-                        path,
-                        file: Some(file),
-                    });
-                }
-                Err(FsError::Write { detail, .. })
-                    if detail.contains("already exists") || detail.contains("Already exists") =>
-                {
-                    continue;
-                }
-                Err(error) => return Err(error),
-            }
-        }
-        Err(FsError::InvalidRequest(
-            "could not allocate a unique temporary file after 16 attempts".to_owned(),
-        ))
+        let path = root.join(format!("tmp-file-{}", uuid::Uuid::new_v4()));
+        let file = AsyncFile::create_new(&path).await?;
+        Ok(Self {
+            path,
+            file: Some(file),
+        })
     }
 
     /// Return the temporary file path.

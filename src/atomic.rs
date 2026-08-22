@@ -36,11 +36,20 @@ where
     }
     .await;
 
-    if result.is_err() {
-        // Cleanup is part of the async failure path; it is not hidden in Drop.
-        let _ = tokio::fs::remove_file(&temporary).await;
+    match result {
+        Ok(()) => Ok(()),
+        Err(primary) => {
+            // Cleanup is part of the async failure path; it is not hidden in
+            // Drop and a cleanup failure must remain visible to the caller.
+            match tokio::fs::remove_file(&temporary).await {
+                Ok(()) => Err(primary),
+                Err(cleanup) => Err(FsError::Write {
+                    path: temporary.display().to_string(),
+                    detail: format!("{primary}; temporary-file cleanup failed: {cleanup}"),
+                }),
+            }
+        }
     }
-    result
 }
 
 /// Atomically replace a file with UTF-8 text.

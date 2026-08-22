@@ -1,7 +1,7 @@
 use crate::{
     AsyncFile, DirectoryEntryKind, DirectoryReader, FsError, TempDir, atomic_write_string,
-    read_bounded, read_string_bounded, read_string_bounded_if_exists, remove_file,
-    symlink_metadata, try_exists,
+    canonicalize, read_bounded, read_string_bounded, read_string_bounded_if_exists, remove_file,
+    set_permissions, symlink_metadata, try_exists,
 };
 
 async fn test_root() -> TempDir {
@@ -95,6 +95,30 @@ async fn symlink_metadata_is_available_through_the_async_boundary() {
             .expect("read metadata")
             .is_file()
     );
+    root.remove().await.expect("remove test root");
+}
+
+#[tokio::test]
+async fn canonicalize_and_set_permissions_use_async_filesystem_boundary() {
+    let root = test_root().await;
+    let path = root.path().join("nested");
+    crate::ensure_dir(&path)
+        .await
+        .expect("create nested directory");
+
+    let canonical = canonicalize(&path).await.expect("canonicalize path");
+    assert!(canonical.is_absolute());
+    assert_eq!(canonical.file_name(), Some(std::ffi::OsStr::new("nested")));
+
+    let file = path.join("file.txt");
+    AsyncFile::create(&file).await.expect("create file");
+    let permissions = symlink_metadata(&file)
+        .await
+        .expect("read metadata")
+        .permissions();
+    set_permissions(&file, permissions)
+        .await
+        .expect("set permissions");
     root.remove().await.expect("remove test root");
 }
 

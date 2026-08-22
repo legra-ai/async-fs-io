@@ -1,6 +1,6 @@
 //! Bounded file convenience operations.
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use tokio::io::AsyncReadExt;
 
@@ -13,6 +13,14 @@ pub struct FileMetadata {
     pub length: u64,
     /// Whether the path identifies a directory.
     pub is_directory: bool,
+}
+
+/// Canonicalize a path through the asynchronous filesystem boundary.
+pub async fn canonicalize(path: impl AsRef<Path>) -> Result<PathBuf, FsError> {
+    let path = path.as_ref();
+    tokio::fs::canonicalize(path)
+        .await
+        .map_err(|error| FsError::io(Operation::Read, path, error))
 }
 
 /// Read a file only when its complete contents fit under `max_bytes`.
@@ -107,6 +115,17 @@ pub async fn symlink_metadata(path: impl AsRef<Path>) -> Result<std::fs::Metadat
     tokio::fs::symlink_metadata(path)
         .await
         .map_err(|error| FsError::io(Operation::Read, path, error))
+}
+
+/// Set filesystem permissions through the asynchronous filesystem boundary.
+pub async fn set_permissions(
+    path: impl AsRef<Path>,
+    permissions: std::fs::Permissions,
+) -> Result<(), FsError> {
+    let path = path.as_ref();
+    tokio::fs::set_permissions(path, permissions)
+        .await
+        .map_err(|error| FsError::io(Operation::Write, path, error))
 }
 
 /// Return whether a path exists, preserving errors other than not-found.

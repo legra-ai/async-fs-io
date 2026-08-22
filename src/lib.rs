@@ -7,6 +7,7 @@ mod atomic;
 mod directory;
 mod error;
 mod file;
+mod lock;
 mod temp;
 
 pub use async_file::AsyncFile;
@@ -19,6 +20,7 @@ pub use file::{
     FileMetadata, metadata, read_bounded, read_string_bounded, read_string_bounded_if_exists,
     remove_file, remove_if_exists, rename, symlink_metadata, try_exists, write_bytes,
 };
+pub use lock::{ExclusiveLock, acquire_exclusive_lock};
 pub use temp::{TempDir, TempFile};
 
 #[cfg(test)]

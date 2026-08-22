@@ -1,6 +1,6 @@
 use crate::{
     AsyncFile, DirectoryEntryKind, DirectoryReader, FsError, TempDir, atomic_write_string,
-    read_bounded, read_string_bounded,
+    read_bounded, read_string_bounded, read_string_bounded_if_exists, try_exists,
 };
 
 async fn test_root() -> TempDir {
@@ -56,6 +56,30 @@ async fn directory_reader_keeps_one_entry_at_a_time() {
     }
 
     assert_eq!(seen, 2);
+    root.remove().await.expect("remove test root");
+}
+
+#[tokio::test]
+async fn missing_directory_and_file_are_distinguished_without_blocking_io() {
+    let root = test_root().await;
+    let missing_dir = root.path().join("missing-directory");
+    assert!(
+        DirectoryReader::open_if_exists(&missing_dir)
+            .await
+            .expect("inspect missing directory")
+            .is_none()
+    );
+    assert!(
+        !try_exists(&missing_dir)
+            .await
+            .expect("inspect missing path")
+    );
+    assert_eq!(
+        read_string_bounded_if_exists(&root.path().join("missing.txt"), 32)
+            .await
+            .expect("read missing text"),
+        None
+    );
     root.remove().await.expect("remove test root");
 }
 

@@ -64,6 +64,16 @@ impl DirectoryReader {
         Ok(Self { root, inner })
     }
 
+    /// Open a directory when it exists, returning `None` for a missing path.
+    pub async fn open_if_exists(path: impl AsRef<Path>) -> Result<Option<Self>, FsError> {
+        let root = path.as_ref().to_owned();
+        match tokio::fs::read_dir(&root).await {
+            Ok(inner) => Ok(Some(Self { root, inner })),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(None),
+            Err(error) => Err(FsError::io(Operation::Directory, &root, error)),
+        }
+    }
+
     /// Read the next entry, returning `None` at end of directory.
     pub async fn next(&mut self) -> Result<Option<DirectoryEntry>, FsError> {
         let Some(entry) = self

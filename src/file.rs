@@ -58,6 +58,37 @@ pub async fn read_string_bounded(
     })
 }
 
+/// Read UTF-8 text only when its complete contents fit under `max_bytes`,
+/// returning `None` when the file does not exist.
+pub async fn read_string_bounded_if_exists(
+    path: impl AsRef<Path>,
+    max_bytes: usize,
+) -> Result<Option<String>, FsError> {
+    let path = path.as_ref();
+    let Some(file) = AsyncFile::open_if_exists(path).await? else {
+        return Ok(None);
+    };
+    let read_limit = max_bytes
+        .checked_add(1)
+        .ok_or_else(|| FsError::InvalidRequest("read bound overflow".to_owned()))?;
+    // bounded: this allocation is capped by the caller-provided read limit.
+    let mut output = Vec::with_capacity(max_bytes.min(64 * 1024));
+    file.take(read_limit as u64)
+        .read_to_end(&mut output)
+        .await
+        .map_err(|error| FsError::io(Operation::Read, path, error))?;
+    if output.len() > max_bytes {
+        return Err(FsError::InvalidRequest(format!(
+            "file {} exceeds the {} byte read bound",
+            path.display(),
+            max_bytes
+        )));
+    }
+    String::from_utf8(output)
+        .map(Some)
+        .map_err(|error| FsError::io(Operation::Read, path, error))
+}
+
 /// Return metadata through the async filesystem boundary.
 pub async fn metadata(path: impl AsRef<Path>) -> Result<FileMetadata, FsError> {
     let path = path.as_ref();
@@ -68,6 +99,16 @@ pub async fn metadata(path: impl AsRef<Path>) -> Result<FileMetadata, FsError> {
         length: metadata.len(),
         is_directory: metadata.is_dir(),
     })
+}
+
+/// Return whether a path exists, preserving errors other than not-found.
+pub async fn try_exists(path: impl AsRef<Path>) -> Result<bool, FsError> {
+    let path = path.as_ref();
+    match tokio::fs::metadata(path).await {
+        Ok(_) => Ok(true),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(false),
+        Err(error) => Err(FsError::io(Operation::Read, path, error)),
+    }
 }
 
 /// Write a bounded caller-owned byte slice to a file, replacing its contents.

@@ -1,6 +1,6 @@
 use crate::{
     AsyncFile, DirectoryEntryKind, DirectoryReader, FsError, TempDir, atomic_write_string,
-    read_bounded, read_string_bounded, read_string_bounded_if_exists, try_exists,
+    read_bounded, read_string_bounded, read_string_bounded_if_exists, symlink_metadata, try_exists,
 };
 
 async fn test_root() -> TempDir {
@@ -79,6 +79,20 @@ async fn missing_directory_and_file_are_distinguished_without_blocking_io() {
             .await
             .expect("read missing text"),
         None
+    );
+    root.remove().await.expect("remove test root");
+}
+
+#[tokio::test]
+async fn symlink_metadata_is_available_through_the_async_boundary() {
+    let root = test_root().await;
+    let path = root.path().join("file.txt");
+    AsyncFile::create(&path).await.expect("create file");
+    assert!(
+        symlink_metadata(&path)
+            .await
+            .expect("read metadata")
+            .is_file()
     );
     root.remove().await.expect("remove test root");
 }

@@ -101,6 +101,14 @@ pub async fn metadata(path: impl AsRef<Path>) -> Result<FileMetadata, FsError> {
     })
 }
 
+/// Return operating-system metadata without following a symbolic link.
+pub async fn symlink_metadata(path: impl AsRef<Path>) -> Result<std::fs::Metadata, FsError> {
+    let path = path.as_ref();
+    tokio::fs::symlink_metadata(path)
+        .await
+        .map_err(|error| FsError::io(Operation::Read, path, error))
+}
+
 /// Return whether a path exists, preserving errors other than not-found.
 pub async fn try_exists(path: impl AsRef<Path>) -> Result<bool, FsError> {
     let path = path.as_ref();

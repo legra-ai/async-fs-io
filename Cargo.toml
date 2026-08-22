@@ -1,6 +1,6 @@
 [package]
 name = "async-fs-io"
-version = "0.1.1"
+version = "0.1.2"
 description = "Async-first filesystem primitives, bounded reads, streaming directory access, and temporary resources"
 authors = ["Jacobus Geluk <jacobus.geluk@dataroad.com>"]
 edition = "2024"

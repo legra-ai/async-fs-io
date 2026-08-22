@@ -17,7 +17,7 @@ pub use directory::{
 pub use error::{FsError, Operation};
 pub use file::{
     FileMetadata, metadata, read_bounded, read_string_bounded, read_string_bounded_if_exists,
-    remove_if_exists, rename, try_exists, write_bytes,
+    remove_if_exists, rename, symlink_metadata, try_exists, write_bytes,
 };
 pub use temp::{TempDir, TempFile};
 

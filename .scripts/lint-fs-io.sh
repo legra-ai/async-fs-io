@@ -33,8 +33,13 @@ while (($# > 0)); do
 done
 
 pattern='std::fs::|tokio::fs::|async_std::fs::|std::os::(unix|windows)::fs::|spawn_blocking.*(File|read|write|rename|remove|metadata|read_dir)'
-matches=$(rg --line-number --no-heading --color never --glob '*.rs' "$pattern" "$root" 2>/tmp/lint-fs-io.err)
-rc=$?
+if command -v rg >/dev/null 2>&1; then
+    matches=$(rg --line-number --no-heading --color never --glob '*.rs' "$pattern" "$root" 2>/tmp/lint-fs-io.err)
+    rc=$?
+else
+    matches=$(grep -RInE --include='*.rs' "$pattern" "$root" 2>/tmp/lint-fs-io.err)
+    rc=$?
+fi
 if (( rc > 1 )); then
     cat /tmp/lint-fs-io.err >&2
     exit "$rc"

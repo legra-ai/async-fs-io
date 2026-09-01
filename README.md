@@ -34,11 +34,14 @@ Run the repository lint with:
 ./.scripts/lint-fs-io.sh --allow-path src
 ```
 
-Copy that command into CI and the repository's pre-commit hook. In a consuming
-repository, omit `--allow-path src`; the consumer has no filesystem backend
-allowlist. The lint scans production code, tests, benchmarks, and private
-helpers. Its only allowlist in this repository is the audited backend
-implementation under `src`.
+Copy that command into CI and the repository's pre-commit hook (this
+repository runs it in both). In a consuming repository, omit
+`--allow-path src`; the consumer has no filesystem backend allowlist. The
+lint scans production code, tests, benchmarks, and private helpers, and it
+matches both fully-qualified paths (`std::fs::read`) **and** the import
+statements themselves (`use std::fs;`, `use tokio::fs as t;`), so aliasing
+cannot slip a call past it. Its only allowlist in this repository is the
+audited backend implementation under `src`.
 
 ## License
 

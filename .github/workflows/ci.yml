@@ -26,6 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - run: ./.scripts/lint-fs-io.test.sh
       - run: ./.scripts/lint-fs-io.sh --allow-path src
 
   clippy:

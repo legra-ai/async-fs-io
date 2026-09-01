@@ -22,3 +22,9 @@ if ! cargo +nightly clippy --all-targets -- -D warnings; then
     echo "Clippy check failed."
     exit 1
 fi
+
+echo "Running the filesystem-boundary lint..."
+if ! ./.scripts/lint-fs-io.sh --allow-path src; then
+    echo "Filesystem-boundary lint failed."
+    exit 1
+fi

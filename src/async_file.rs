@@ -1,13 +1,29 @@
 //! Async low-level file handle.
 
 use std::io::SeekFrom;
-use std::path::{Path, PathBuf};
+use std::path::{
+    Path,
+    PathBuf,
+};
 use std::pin::Pin;
-use std::task::{Context, Poll};
+use std::task::{
+    Context,
+    Poll,
+};
 
-use tokio::io::{AsyncRead, AsyncReadExt, AsyncSeekExt, AsyncWrite, AsyncWriteExt, ReadBuf};
+use tokio::io::{
+    AsyncRead,
+    AsyncReadExt,
+    AsyncSeekExt,
+    AsyncWrite,
+    AsyncWriteExt,
+    ReadBuf,
+};
 
-use crate::{FsError, Operation};
+use crate::{
+    FsError,
+    Operation,
+};
 
 /// A file handle whose open, read, write, seek, flush, and metadata operations
 /// are all asynchronous.

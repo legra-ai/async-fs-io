@@ -13,6 +13,14 @@ keywords = ["async", "filesystem", "tokio", "streaming", "io"]
 categories = ["filesystem", "asynchronous"]
 publish = true
 build = "build.rs"
+include = [
+    "Cargo.toml",
+    "README.md",
+    "LICENSE-*",
+    "build.rs",
+    "src/**/*.rs",
+    "tests/**/*.rs",
+]
 
 [dependencies]
 fs2 = "0.4"

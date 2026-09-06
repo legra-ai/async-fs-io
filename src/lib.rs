@@ -11,18 +11,45 @@ mod lock;
 mod temp;
 
 pub use async_file::AsyncFile;
-pub use atomic::{atomic_copy, atomic_write, atomic_write_string};
+pub use atomic::{
+    atomic_copy,
+    atomic_write,
+    atomic_write_string,
+};
 pub use directory::{
-    DirectoryEntry, DirectoryEntryKind, DirectoryReader, ensure_dir, remove_dir_all,
+    DirectoryEntry,
+    DirectoryEntryKind,
+    DirectoryReader,
+    ensure_dir,
+    remove_dir_all,
 };
-pub use error::{FsError, Operation};
+pub use error::{
+    FsError,
+    Operation,
+};
 pub use file::{
-    FileMetadata, canonicalize, metadata, read_bounded, read_string_bounded,
-    read_string_bounded_if_exists, remove_file, remove_if_exists, rename, set_permissions,
-    symlink_metadata, try_exists, write_bytes,
+    FileMetadata,
+    canonicalize,
+    metadata,
+    read_bounded,
+    read_string_bounded,
+    read_string_bounded_if_exists,
+    remove_file,
+    remove_if_exists,
+    rename,
+    set_permissions,
+    symlink_metadata,
+    try_exists,
+    write_bytes,
 };
-pub use lock::{ExclusiveLock, acquire_exclusive_lock};
-pub use temp::{TempDir, TempFile};
+pub use lock::{
+    ExclusiveLock,
+    acquire_exclusive_lock,
+};
+pub use temp::{
+    TempDir,
+    TempFile,
+};
 
 #[cfg(test)]
 mod tests;

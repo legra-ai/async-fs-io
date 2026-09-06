@@ -1,13 +1,25 @@
 //! Atomic, streaming file replacement.
 
-use std::path::{Path, PathBuf};
-
+use std::path::{
+    Path,
+    PathBuf,
+};
 use std::pin::Pin;
-use std::task::{Context, Poll};
+use std::task::{
+    Context,
+    Poll,
+};
 
-use tokio::io::{AsyncRead, ReadBuf};
+use tokio::io::{
+    AsyncRead,
+    ReadBuf,
+};
 
-use crate::{AsyncFile, FsError, Operation};
+use crate::{
+    AsyncFile,
+    FsError,
+    Operation,
+};
 
 /// Stream `reader` into a temporary sibling file and atomically rename it over
 /// `target`.

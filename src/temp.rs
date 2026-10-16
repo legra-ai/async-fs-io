@@ -1,8 +1,15 @@
 //! Explicitly asynchronous temporary files and directories.
 
-use std::path::{Path, PathBuf};
+use std::path::{
+    Path,
+    PathBuf,
+};
 
-use crate::{AsyncFile, FsError, Operation};
+use crate::{
+    AsyncFile,
+    FsError,
+    Operation,
+};
 
 /// An asynchronously created temporary directory.
 pub struct TempDir {

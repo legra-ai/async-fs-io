@@ -1,10 +1,17 @@
 //! Bounded file convenience operations.
 
-use std::path::{Path, PathBuf};
+use std::path::{
+    Path,
+    PathBuf,
+};
 
 use tokio::io::AsyncReadExt;
 
-use crate::{AsyncFile, FsError, Operation};
+use crate::{
+    AsyncFile,
+    FsError,
+    Operation,
+};
 
 /// Metadata needed without exposing filesystem-specific read helpers.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -1,15 +1,9 @@
 //! Bounded, pull-based asynchronous directory traversal.
 
 use std::ffi::OsString;
-use std::path::{
-    Path,
-    PathBuf,
-};
+use std::path::{Path, PathBuf};
 
-use crate::{
-    FsError,
-    Operation,
-};
+use crate::{FsError, Operation};
 
 /// The kind of an asynchronously inspected directory entry.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -1,11 +1,7 @@
 //! Public-API integration test: atomic writes land whole and temporary
 //! directories clean up, from the shipped crate.
 
-use async_fs_io::{
-    TempDir,
-    atomic_write_string,
-    read_string_bounded,
-};
+use async_fs_io::{TempDir, atomic_write_string, read_string_bounded};
 
 #[tokio::test]
 async fn atomic_string_write_round_trips() {

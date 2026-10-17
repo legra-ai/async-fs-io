@@ -2,3 +2,6 @@
 CHANGELOG.md
 /target/
 rustc-ice-*.txt
+
+__pycache__/
+*.pyc

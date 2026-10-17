@@ -49,3 +49,23 @@ Licensed under either of:
 
 - Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE));
 - MIT License ([LICENSE-MIT](LICENSE-MIT)).
+
+
+## Developer hooks and dependency ownership
+
+Enable the repository's existing hooks explicitly from its root:
+
+```sh
+git config --local core.hooksPath .githooks
+```
+
+Filesystem primitives cannot depend on Rhusky: Rhusky itself uses this
+crate. Build-time installation would introduce a dependency loop and
+could change a consumer's Git configuration through inherited settings.
+This crate has no build script or hook-installer dependency. A shipped
+integration test builds it as a dependency with an inherited repository
+root and verifies that the consumer's hooks stay unchanged.
+
+The shared CI pipeline validates packaged tests on Linux, macOS and
+Windows, then publishes only the exact tested revision. See
+`.github/PUBLISH.md` for the single release path.

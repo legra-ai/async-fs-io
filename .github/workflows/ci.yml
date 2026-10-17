@@ -16,7 +16,7 @@ jobs:
       - run: python3 -m unittest discover -s scripts -p 'test_*.py'
   ci:
     needs: prepare
-    uses: legra-ai/github-actions/.github/workflows/cargo-maintenance.yml@2ff75bbc66cc08064a55b97dd693ef60f4d9b95d
+    uses: legra-ai/github-actions/.github/workflows/cargo-maintenance.yml@4981df8426b6a8e9e8e4de2398ca6aa5a596b7c7
     with:
       crate-name: async-fs-io
       kind: library

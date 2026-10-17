@@ -81,5 +81,15 @@ class CommitMessageTests(unittest.TestCase):
                     self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
 
 
+class ProtectedChecksTests(unittest.TestCase):
+    def test_stable_required_job_contexts_remain_available(self):
+        # Existing repository protection requires these unprefixed contexts.
+        workflow = (ROOT / '.github/workflows/ci.yml').read_text()
+        for job in ['prepare', 'test']:
+            self.assertRegex(workflow, rf'(?m)^  {job}:$')
+        self.assertIn('needs: [prepare, ci]', workflow)
+        self.assertIn("if: always()", workflow)
+
+
 if __name__ == '__main__':
     unittest.main()

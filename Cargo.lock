@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "async-fs-io"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "fs2",
  "tempfile",

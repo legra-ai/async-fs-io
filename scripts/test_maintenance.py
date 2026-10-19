@@ -28,6 +28,16 @@ class MaintenancePolicyTests(unittest.TestCase):
         self.assertIn('merge-tested-dependabot@', merge)
         self.assertIn('actions/create-github-app-token@', merge)
 
+    def test_dependency_merger_cannot_reuse_the_release_writer(self):
+        workflow = (ROOT / '.github/workflows/dependabot-merge.yml').read_text()
+        self.assertIn("if: github.event.workflow_run.conclusion == 'success'", workflow)
+        self.assertIn('id: merger', workflow)
+        self.assertEqual(workflow.count('app-id: ${{ secrets.RELEASE_MERGER_APP_ID }}'), 2)
+        self.assertIn('private-key: ${{ secrets.RELEASE_MERGER_APP_KEY }}', workflow)
+        self.assertIn('token: ${{ steps.merger.outputs.token }}', workflow)
+        self.assertNotIn('RELEASE_WRITER_', workflow)
+        self.assertNotIn('checkout', workflow)
+
     def test_compiler_and_formatter_pins_match_hooks(self):
         package = tomllib.loads((ROOT / 'Cargo.toml').read_text())['package']
         compiler = tomllib.loads((ROOT / 'rust-toolchain.toml').read_text())['toolchain']['channel']

@@ -4,6 +4,7 @@
 
 mod async_file;
 mod atomic;
+mod chunk;
 mod directory;
 mod error;
 mod file;
@@ -15,6 +16,12 @@ pub use atomic::{
     atomic_copy,
     atomic_write,
     atomic_write_string,
+};
+pub use chunk::{
+    append_bytes,
+    create_with_bytes,
+    read_bytes_at,
+    write_bytes_at,
 };
 pub use directory::{
     DirectoryEntry,
